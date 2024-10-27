@@ -46,6 +46,7 @@ jobs:
           echo "DOCKERHUB_IMG=${{ vars.DOCKERHUB_IMG }}" >> $GITHUB_ENV
           echo "HUGGINGFACE_ACCESS_TOKEN=${{ secrets.HUGGINGFACE_ACCESS_TOKEN }}" >> $GITHUB_ENV
           echo "RELEASE_VERSION=${GITHUB_REF##refs/heads/}" | sed 's/\//-/g' >> $GITHUB_ENV
+          echo "MODEL_TYPE=${{ vars.MODEL_TYPE }}" >> $GITHUB_ENV
 
       - name: Build and push the images to Docker Hub
         uses: docker/bake-action@v2
@@ -56,3 +57,4 @@ jobs:
             *.args.DOCKERHUB_IMG=${{ env.DOCKERHUB_IMG }}
             *.args.RELEASE_VERSION=${{ env.RELEASE_VERSION }}
             *.args.HUGGINGFACE_ACCESS_TOKEN=${{ env.HUGGINGFACE_ACCESS_TOKEN }}
+            *.args.MODEL_TYPE=${{ env.MODEL_TYPE }}
