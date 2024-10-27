@@ -69,7 +69,7 @@ RUN if [ "$MODEL_TYPE" = "sdxl" ]; then \
       wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O models/vae/ae.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors; \
     fi
 
-# Add Your Own Model
+# Add Your Own Models
 RUN wget -O models/lora/MooDeng.safetensors https://civitai.com/api/download/models/870427?type=Model&format=SafeTensor
 
 
