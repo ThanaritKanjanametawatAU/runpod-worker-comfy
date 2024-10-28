@@ -47,7 +47,8 @@ FROM base as downloader
 SHELL ["/bin/bash", "-c"]
 
 ARG HUGGINGFACE_ACCESS_TOKEN
-RUN echo "Token prefix: ${HUGGINGFACE_ACCESS_TOKEN:0:4}..."
+ENV HUGGINGFACE_ACCESS_TOKEN=${HUGGINGFACE_ACCESS_TOKEN}
+RUN echo "Token prefix: ${HUGGINGFACE_ACCESS_TOKEN:0:8}..."
 
 # Change working directory to ComfyUI
 WORKDIR /comfyui
