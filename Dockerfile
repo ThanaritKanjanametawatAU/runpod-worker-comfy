@@ -44,6 +44,8 @@ RUN chmod +x /start.sh
 # Stage 2: Download models
 FROM base as downloader
 
+SHELL ["/bin/bash", "-c"]
+
 ARG HUGGINGFACE_ACCESS_TOKEN
 RUN echo "Token prefix: ${HUGGINGFACE_ACCESS_TOKEN:0:4}..."
 
