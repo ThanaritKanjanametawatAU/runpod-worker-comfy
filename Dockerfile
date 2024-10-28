@@ -45,9 +45,13 @@ RUN chmod +x /start.sh
 FROM base as downloader
 
 ARG HUGGINGFACE_ACCESS_TOKEN
+RUN echo "Token prefix: ${HUGGINGFACE_ACCESS_TOKEN:0:4}..."
 
 # Change working directory to ComfyUI
 WORKDIR /comfyui
+
+# Check if directory exists
+RUN ls models/unet/
 
 # Download checkpoints/vae/LoRA to include in image based on model type
 RUN wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O models/unet/flux1-dev.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors
