@@ -1,5 +1,5 @@
 # Stage 1: Base image with common dependencies
-FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04 as base
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04 AS base
 
 # Prevents prompts from packages asking for user input during installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -42,12 +42,11 @@ ADD src/start.sh src/rp_handler.py test_input.json ./
 RUN chmod +x /start.sh
 
 # Stage 2: Download models
-FROM base as downloader
+FROM base AS downloader
 
 SHELL ["/bin/bash", "-c"]
 
 ARG HUGGINGFACE_ACCESS_TOKEN
-ENV HUGGINGFACE_ACCESS_TOKEN=${HUGGINGFACE_ACCESS_TOKEN}
 RUN echo "Token prefix: ${HUGGINGFACE_ACCESS_TOKEN:0:8}..."
 
 # Change working directory to ComfyUI
@@ -63,11 +62,11 @@ RUN wget -O models/clip/t5xxl_fp8_e4m3fn.safetensors https://huggingface.co/comf
 RUN wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O models/vae/ae.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors
 
 # Add Your Own Models
-RUN wget -O models/lora/MooDeng.safetensors https://civitai.com/api/download/models/870427?type=Model&format=SafeTensor
+RUN wget -O models/loras/MooDeng.safetensors https://civitai.com/api/download/models/870427?type=Model&format=SafeTensor
 
 
 # Stage 3: Final image
-FROM base as final
+FROM base AS final
 
 # Copy models from stage 2 to the final image
 COPY --from=downloader /comfyui/models /comfyui/models
