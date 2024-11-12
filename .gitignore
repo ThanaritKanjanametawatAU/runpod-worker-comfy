@@ -2,7 +2,7 @@
 venv
 .env
 data
-models
+*.safetensors
 simulated_uploaded
 __pycache__
 .docker-cache

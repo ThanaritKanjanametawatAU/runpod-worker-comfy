@@ -52,17 +52,22 @@ RUN echo "Token prefix: ${HUGGINGFACE_ACCESS_TOKEN:0:8}..."
 # Change working directory to ComfyUI
 WORKDIR /comfyui
 
-# Check if directory exists
-RUN ls models/unet/
+# Add Your Own Models
+COPY models/MooDeng.safetensors models/loras/
+RUN ls models/loras/
 
 # Download checkpoints/vae/LoRA to include in image based on model type
-RUN wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O models/unet/flux1-dev.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors
-RUN wget -O models/clip/clip_l.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors
-RUN wget -O models/clip/t5xxl_fp8_e4m3fn.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors
-RUN wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O models/vae/ae.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors
+RUN --mount=type=cache,target=/models \
+    wget -nv --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O models/unet/flux1-dev.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors \
+    && wget -nv -O models/clip/clip_l.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors \
+    && wget -nv -O models/clip/t5xxl_fp16.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors \
+    && wget -nv --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O models/vae/ae.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors
 
-# Add Your Own Models
-RUN wget -O models/loras/MooDeng.safetensors https://civitai.com/api/download/models/870427?type=Model&format=SafeTensor
+
+# Check if models are downloaded
+RUN ls models/unet/
+RUN ls models/vae/
+RUN ls models/clip/
 
 
 # Stage 3: Final image
