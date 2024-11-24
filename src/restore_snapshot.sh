@@ -2,10 +2,11 @@
 
 set -e
 
-SNAPSHOT_FILE=$(ls /*snapshot*.json 2>/dev/null | head -n 1)
+# Use a fixed path instead of searching
+SNAPSHOT_FILE="/worker_snapshot.json"
 
-if [ -z "$SNAPSHOT_FILE" ]; then
-    echo "runpod-worker-comfy: No snapshot file found. Exiting..."
+if [ ! -f "$SNAPSHOT_FILE" ]; then
+    echo "runpod-worker-comfy: No snapshot file found at $SNAPSHOT_FILE. Exiting..."
     exit 0
 fi
 
