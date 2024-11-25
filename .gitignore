@@ -7,3 +7,7 @@ simulated_uploaded
 __pycache__
 .docker-cache
 dockerbuildcmd.txt
+tests/test_endpoint/test_endpoint.py
+tests/test_endpoint/current.jpg
+models/ChrismasSuit.png
+buildcommand.txt
