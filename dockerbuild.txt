@@ -1,0 +1,43 @@
+
+# On Local Machine
+runpodctl send models/ .env
+
+
+
+# On Runpod
+
+#Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+docker --version
+dockerd &
+
+
+git clone https://github.com/ThanaritKanjanametawatAU/runpod-worker-comfy.git
+cd runpod-worker-comfy
+
+
+runpodctl receive .........
+
+
+# export ENV variables
+set -a; source .env; set +a
+
+# Login to Docker Hub
+docker login
+
+
+
+
+# Build the docker image without cache
+DOCKER_BUILDKIT=1 docker build --build-arg HUGGINGFACE_ACCESS_TOKEN=$HUGGINGFACE_ACCESS_TOKEN \
+-t whitemoney293/comfyui-worker:v1.0.4 --platform linux/amd64 .
+docker push whitemoney293/comfyui-worker:v1.0.4
+
+
+# Build the docker image with cache
+mkdir -p .docker-cache
+DOCKER_BUILDKIT=1 docker build --build-arg HUGGINGFACE_ACCESS_TOKEN=$HUGGINGFACE_ACCESS_TOKEN \
+-t whitemoney293/comfyui-worker:v1.0.4 --platform linux/amd64 --cache-from type=local,src=.docker-cache \
+--cache-to type=local,dest=.docker-cache .
+docker push whitemoney293/comfyui-worker:v1.0.4
