@@ -31,8 +31,8 @@ docker login
 
 # Build the docker image without cache
 DOCKER_BUILDKIT=1 docker build --build-arg HUGGINGFACE_ACCESS_TOKEN=$HUGGINGFACE_ACCESS_TOKEN \
--t whitemoney293/comfyui-worker:v1.0.4 --platform linux/amd64 .
-docker push whitemoney293/comfyui-worker:v1.0.4
+-t whitemoney293/comfyui-worker:v1.0.12 --platform linux/amd64 .
+docker push whitemoney293/comfyui-worker:v1.0.12
 
 
 # Build the docker image with cache
@@ -41,3 +41,10 @@ DOCKER_BUILDKIT=1 docker build --build-arg HUGGINGFACE_ACCESS_TOKEN=$HUGGINGFACE
 -t whitemoney293/comfyui-worker:v1.0.4 --platform linux/amd64 --cache-from type=local,src=.docker-cache \
 --cache-to type=local,dest=.docker-cache .
 docker push whitemoney293/comfyui-worker:v1.0.4
+
+
+sudo docker run --rm --runtime=nvidia --gpus all nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04 nvidia-smi
+
+# Test with Docker Compose
+docker compose up
+docker compose exec my-comfyui-worker bash

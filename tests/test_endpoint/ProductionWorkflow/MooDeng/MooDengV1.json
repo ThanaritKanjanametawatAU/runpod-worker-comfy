@@ -184,7 +184,7 @@
         "Node name for S&R": "DualCLIPLoader"
       },
       "widgets_values": [
-        "t5xxl_fp16.safetensors",
+        "t5xxl_fp8_e4m3fn.safetensors",
         "clip_l.safetensors",
         "flux"
       ]
@@ -622,7 +622,7 @@
         "Node name for S&R": "LoadImage"
       },
       "widgets_values": [
-        "IMG_20240112_145239.jpg",
+        "current.jpg",
         "image"
       ]
     },

@@ -1,12 +1,10 @@
 import requests
-import os
+import json
+import base64
 import io
 from PIL import Image
-import base64
-import random
-import json
-endpoint = os.environ.get("RUNPOD_ENDPOINT")
-bearer_token = os.environ.get("RUNPOD_BEARER_TOKEN")
+
+endpoint = "http://localhost:8000/runsync"
 
 def convert_image_to_base64(image_path):
     with open(image_path, "rb") as image_file:
@@ -44,7 +42,7 @@ def test_endpoint(workflow_path, image_path=None):
 
     try:
         # Make the API request
-        response = requests.post(endpoint, json=endpoint_body, headers={"Authorization": f"Bearer {bearer_token}"})
+        response = requests.post(endpoint, json=endpoint_body)
         response.raise_for_status()  # Raise an exception for bad status codes
         
         # Parse the response

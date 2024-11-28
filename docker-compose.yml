@@ -1,12 +1,12 @@
 services:
-  comfyui-worker:
-    image: timpietruskyblibla/runpod-worker-comfy:3.4.0-sdxl
+  my-comfyui-worker:
+    image: whitemoney293/comfyui-worker:v1.0.12
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: all
+              count: 1
               capabilities: [gpu]
     environment:
       - SERVE_API_LOCALLY=true

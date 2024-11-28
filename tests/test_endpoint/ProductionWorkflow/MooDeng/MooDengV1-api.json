@@ -52,7 +52,7 @@
   },
   "11": {
     "inputs": {
-      "clip_name1": "t5xxl_fp16.safetensors",
+      "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
       "clip_name2": "clip_l.safetensors",
       "type": "flux"
     },
@@ -163,7 +163,7 @@
   },
   "30": {
     "inputs": {
-      "image": "IMG_20240112_145239.jpg",
+      "image": "current.jpg",
       "upload": "image"
     },
     "class_type": "LoadImage",
