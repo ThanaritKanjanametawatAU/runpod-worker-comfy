@@ -10,6 +10,8 @@ ENV PYTHONUNBUFFERED=1
 # Speed up some cmake builds
 ENV CMAKE_BUILD_PARALLEL_LEVEL=8
 
+ARG GITHUB_TOKEN
+
 # Install Python, git and other necessary tools
 RUN apt-get update && apt-get install -y \
     python3.10 \
@@ -23,19 +25,28 @@ RUN apt-get update && apt-get install -y \
 # Clean up to reduce image size
 RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
+RUN apt update && apt install -y python3.10-venv
+
+RUN apt-get update && apt-get install -y libglib2.0-0 libsm6 libxrender1 libxext6
+
+RUN python3 -m venv venv
+
+RUN . venv/bin/activate && pip install --upgrade pip && which python \
+ && python --version
+
 # Install comfy-cli
-RUN pip install comfy-cli
+RUN . venv/bin/activate && pip install comfy-cli
 
 # Install ComfyUI
 # RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.1 --nvidia --version 0.3.4
-RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.1 --nvidia --version 0.3.5
+RUN . venv/bin/activate && /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.1 --nvidia --version 0.3.6
 
 
 # Change working directory to ComfyUI
 WORKDIR /comfyui
 
 # Install runpod
-RUN pip install runpod requests
+RUN . ../venv/bin/activate && pip install runpod requests
 
 # Support for the network volume
 ADD src/extra_model_paths.yaml ./
@@ -47,14 +58,16 @@ ADD worker_snapshot.json /
 
 # Add scripts
 ADD src/start.sh src/restore_snapshot.sh src/rp_handler.py test_input.json ./
-RUN chmod +x /start.sh /restore_snapshot.sh && /restore_snapshot.sh
+RUN chmod +x /start.sh /restore_snapshot.sh && . venv/bin/activate && /restore_snapshot.sh
 
 
-RUN pip install --upgrade typing_extensions
+RUN . venv/bin/activate && pip install --upgrade typing_extensions
 
-RUN pip install torchvision
+RUN . venv/bin/activate && pip install torchvision
 
-RUN comfy update all && comfy update comfy
+RUN . venv/bin/activate && comfy update all && comfy update comfy
+
+RUN . venv/bin/activate && pip install xformers
 
 
 # Start container
@@ -91,20 +104,36 @@ FROM base AS final
 
 # Add Your Own Models and Files
 COPY models/ChrismasSuit.png /comfyui/input/
+COPY models/elf.png /comfyui/input/
+COPY models/padoru.png /comfyui/input/
+COPY models/reindeer.png /comfyui/input/
+COPY models/santa.png /comfyui/input/
+
+
 COPY models/MooDeng.safetensors /comfyui/models/loras/
 RUN ls /comfyui/models/loras/
-
+RUN mkdir -p /comfyui/models/LLM /comfyui/models/sams /comfyui/models/grounding-dino
 
 # Copy models from the docker image
-COPY --from=whitemoney293/comfyui-flux-models:v1.0.0 /models/unet/flux1-dev.safetensors /comfyui/models/unet/
-COPY --from=whitemoney293/comfyui-flux-models:v1.0.0 /models/vae/ae.safetensors /comfyui/models/vae/
-COPY --from=whitemoney293/comfyui-flux-models:v1.0.0 /models/clip_vision/sigclip_vision_patch14_384.safetensors /comfyui/models/clip_vision/
-COPY --from=whitemoney293/comfyui-flux-models:v1.0.0 /models/style_models/flux1-redux-dev.safetensors /comfyui/models/style_models/
-COPY --from=whitemoney293/comfyui-flux-models:v1.0.0 /models/clip/clip_l.safetensors /comfyui/models/clip/
-COPY --from=whitemoney293/comfyui-flux-models:v1.0.0 /models/clip/t5xxl_fp8_e4m3fn.safetensors /comfyui/models/clip/
+COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/unet/flux1-dev.safetensors /comfyui/models/unet/
+COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/vae/ae.safetensors /comfyui/models/vae/
+COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/clip_vision/sigclip_vision_patch14_384.safetensors /comfyui/models/clip_vision/
+COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/style_models/flux1-redux-dev.safetensors /comfyui/models/style_models/
+COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/clip/clip_l.safetensors /comfyui/models/clip/
+COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/clip/t5xxl_fp8_e4m3fn.safetensors /comfyui/models/clip/
+COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/unet/flux1-fill-dev.safetensors /comfyui/models/unet/
+COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/clip_vision/siglip-so400m-patch14-384.safetensors /comfyui/models/clip_vision/
+COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/clip/ViT-L-14-BEST-smooth-GmP-ft.safetensors /comfyui/models/clip/
+COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/unet/flux1-canny-dev.safetensors /comfyui/models/unet/
 
+# downloading https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth to /comfyui/models/sams/sam_vit_h_4b8939.pth
+RUN wget -O /comfyui/models/sams/sam_vit_h_4b8939.pth https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
 
+# downloading https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py to /comfyui/models/grounding-dino/GroundingDINO_SwinT_OGC.cfg.py
+RUN wget -O /comfyui/models/grounding-dino/GroundingDINO_SwinT_OGC.cfg.py https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py
 
+# downloading https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/groundingdino_swint_ogc.pth to /comfyui/models/grounding-dino/groundingdino_swint_ogc.pth
+RUN wget -O /comfyui/models/grounding-dino/groundingdino_swint_ogc.pth https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/groundingdino_swint_ogc.pth
 
 # Copy models from stage 2 to the final image
 
@@ -129,9 +158,9 @@ RUN echo "Input files:" && ls /comfyui/input/ && \
     echo "Clip vision files:" && ls /comfyui/models/clip_vision/ && \
     echo "Style models files:" && ls /comfyui/models/style_models
 
+RUN . /venv/bin/activate && comfy env
 
 
 
 
-# Start container
 CMD ["/start.sh"]
