@@ -1,16 +1,16 @@
 {
-    "comfyui": "9e1d301129db2507e6681a83d845186802e4ba22",
+    "comfyui": "418eb7062dcbd5c68f869527a7bc34cff55ca87e",
     "git_custom_nodes": {
         "https://github.com/cubiq/ComfyUI_IPAdapter_plus": {
             "hash": "b188a6cb39b512a9c6da7235b880af42c78ccd0d",
             "disabled": false
         },
         "https://github.com/ClownsharkBatwing/RES4LYF": {
-            "hash": "3fab88544588de9f0fec62c56ac0287c1374a65a",
+            "hash": "e44a4fd37b3f591be7d3513a5f5e7ade4fa2af00",
             "disabled": false
         },
         "https://github.com/MushroomFleet/DJZ-Nodes": {
-            "hash": "d9e528347511c5924ee3470e914f13abfa9b49d7",
+            "hash": "b27dfac81b8053e0d41d1fa2bc99640b7ab5f612",
             "disabled": false
         },
         "https://github.com/jamesWalker55/comfyui-various": {
@@ -18,15 +18,15 @@
             "disabled": false
         },
         "https://github.com/ltdrdata/ComfyUI-Manager.git": {
-            "hash": "ba9c71ffa4e433cebf9fbcdbe847ac1827b617e6",
+            "hash": "a41d8d6101ab2e54fc164dad9f62634b5c121c76",
             "disabled": false
         },
         "https://github.com/city96/ComfyUI-GGUF": {
-            "hash": "5875c52f59baca3a9372d68c43a3775e21846fe0",
+            "hash": "0b65261cc4115d273829cd878f8a855e19c5435f",
             "disabled": false
         },
         "https://github.com/pythongosssss/ComfyUI-Custom-Scripts": {
-            "hash": "3c38229fab16e9536a41a107fff545693c71f328",
+            "hash": "19a82e29fddc506cae2e654ef5dd9f81d1f4a4ba",
             "disabled": false
         },
         "https://github.com/kijai/ComfyUI-MochiWrapper.git": {
@@ -35,10 +35,6 @@
         },
         "https://github.com/cubiq/ComfyUI_SimpleMath": {
             "hash": "c6aa9d319ff6539db3d63e65342ae26d5b7d8727",
-            "disabled": false
-        },
-        "https://github.com/alexopus/ComfyUI-Image-Saver": {
-            "hash": "f8520bcfe5339ba7b4bb64ba96f6ed03da87fb89",
             "disabled": false
         },
         "https://github.com/KoreTeknology/ComfyUI-Universal-Styler": {
@@ -50,27 +46,19 @@
             "disabled": false
         },
         "https://github.com/rgthree/rgthree-comfy": {
-            "hash": "5d771b8b56a343c24a26e8cea1f0c87c3d58102f",
+            "hash": "8df5e33109bf4642bc0d720646e32ca2520c1d91",
             "disabled": false
         },
         "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite": {
-            "hash": "f7369389620ff244ddd6086cf0fa792a569086f2",
+            "hash": "d1d59ba6ac84e3c7608841c630fcb66ae3d2e080",
             "disabled": false
         },
         "https://github.com/chrisgoringe/cg-use-everywhere": {
-            "hash": "ce510b97d10e69d5fd0042e115ecd946890d2079",
+            "hash": "7a6a232a41a456f7f7348ecc88fa50c538c7a5ec",
             "disabled": false
         },
         "https://github.com/kijai/ComfyUI-KJNodes": {
-            "hash": "a8aeef670b3f288303f956bf94385cb87978ea93",
-            "disabled": false
-        },
-        "https://github.com/hayden-fr/ComfyUI-Model-Manager": {
-            "hash": "f079d8bde52cdb8365e859d4bf0a60913c40a8be",
-            "disabled": false
-        },
-        "https://github.com/lldacing/ComfyUI_StableHair_ll.git": {
-            "hash": "4bbae92868f2ef8c9bf834a02e2b7b5febdb4d04",
+            "hash": "973ceb6ca8b7525d54873805888ad690090d6b1e",
             "disabled": false
         },
         "https://github.com/omar92/ComfyUI-QualityOfLifeSuit_Omar92": {
@@ -86,7 +74,7 @@
             "disabled": false
         },
         "https://github.com/chflame163/ComfyUI_LayerStyle": {
-            "hash": "127be44f9d6b384e874a73ba794a7eeb8f2b6a0f",
+            "hash": "57d737facc2e04c1beb01799b623d8107067bc25",
             "disabled": false
         },
         "https://github.com/jags111/efficiency-nodes-comfyui": {
@@ -94,7 +82,7 @@
             "disabled": false
         },
         "https://github.com/city96/ComfyUI_ExtraModels": {
-            "hash": "92f556ed4d3bec1a3f16117d2de10f195c36d68e",
+            "hash": "c6527a45f1dcd1b1c5027063f45374e20773f0f1",
             "disabled": false
         },
         "https://github.com/giriss/comfy-image-saver": {
@@ -109,20 +97,8 @@
             "hash": "4e1fd4024cae77a0c53edb8ecc3c8ee04027ebef",
             "disabled": false
         },
-        "https://github.com/ciri/comfyui-model-downloader": {
-            "hash": "1c6bbf4c5b3edd65e4fc9964a3ea29d6bc97f9fb",
-            "disabled": false
-        },
-        "https://github.com/glifxyz/ComfyUI-GlifNodes": {
-            "hash": "b86352ccb506adebc320f0c659cfc46a05c35f0d",
-            "disabled": false
-        },
         "https://github.com/EvilBT/ComfyUI_SLK_joy_caption_two": {
             "hash": "667751cab945bd8e9fb0be4d557d47e36821350a",
-            "disabled": false
-        },
-        "https://github.com/Goktug/comfyui-saveimage-plus": {
-            "hash": "efa54493216e47126e022a6a38cdaf0c0480256d",
             "disabled": false
         },
         "https://github.com/kijai/ComfyUI-segment-anything-2": {
@@ -142,11 +118,11 @@
             "disabled": false
         },
         "https://github.com/sipie800/ComfyUI-PuLID-Flux-Enhanced": {
-            "hash": "afc9705e11ec9095bfbca96e6c1c9b06835cec82",
+            "hash": "5e2de5fab6bdccdcfaff7ba04749fca1eefdbd2d",
             "disabled": false
         },
         "https://github.com/Kosinkadink/ComfyUI-AnimateDiff-Evolved": {
-            "hash": "94eb45621c7e5a5286968b3938b1b7689d34ced0",
+            "hash": "b3e508ae8211892a00f3897fcdb4da2d7514f572",
             "disabled": false
         },
         "https://github.com/kijai/ComfyUI-LLaVA-OneVision": {
@@ -154,7 +130,7 @@
             "disabled": false
         },
         "https://github.com/cubiq/ComfyUI_essentials": {
-            "hash": "33ff89fd354d8ec3ab6affb605a79a931b445d99",
+            "hash": "64e38fd0f3b2e925573684f4a43727be80dc7d5b",
             "disabled": false
         },
         "https://github.com/lquesada/ComfyUI-Inpaint-CropAndStitch": {
@@ -162,7 +138,7 @@
             "disabled": false
         },
         "https://github.com/ltdrdata/ComfyUI-Impact-Pack": {
-            "hash": "1ae7cae2df8cca06027edfa3a24512671239d6c4",
+            "hash": "24de5a846bb9b1c1830af0218f76266c375cc904",
             "disabled": false
         },
         "https://github.com/Derfuu/Derfuu_ComfyUI_ModdedNodes": {
@@ -178,11 +154,11 @@
             "disabled": false
         },
         "https://github.com/Acly/comfyui-tooling-nodes": {
-            "hash": "d7b18203a45bcddb13271bd01546d265a7ff998f",
+            "hash": "fe39d22eb9ccf602a9beeb9930458a308c78b001",
             "disabled": false
         },
         "https://github.com/WASasquatch/was-node-suite-comfyui": {
-            "hash": "056badacda52e88d29d6a65f9509cd3115ace0f2",
+            "hash": "fe7e0884aaf0188248d9abf1e500f5116097fec1",
             "disabled": false
         },
         "https://github.com/Fannovel16/comfyui_controlnet_aux": {
@@ -190,27 +166,19 @@
             "disabled": false
         },
         "https://github.com/ssitu/ComfyUI_UltimateSDUpscale": {
-            "hash": "ff3fdfeee03de46d4462211cffd165d27155e858",
+            "hash": "e617ff20e7ef5baf6526c5ff4eb46a35d24ecbba",
             "disabled": false
         },
         "https://github.com/yolain/ComfyUI-Easy-Use": {
-            "hash": "991a62fc51f7f27176bfe234f312b4883d9815e2",
+            "hash": "3c37489c0ae0492b54a01320bedb3add82cd8370",
             "disabled": false
         },
         "https://github.com/liusida/ComfyUI-AutoCropFaces": {
             "hash": "b2139db9a8ffb4707832106a58f519bbd04e6118",
             "disabled": false
         },
-        "https://github.com/mav-rik/facerestore_cf": {
-            "hash": "67f90bc6be976fb58169866155346b0da13bebee",
-            "disabled": false
-        },
         "https://github.com/kijai/ComfyUI-Florence2": {
-            "hash": "dffd12506d50f0540b8a7f4b36a05d4fb5fed2de",
-            "disabled": false
-        },
-        "https://github.com/EllangoK/ComfyUI-post-processing-nodes": {
-            "hash": "c49a05254795403648f2c1774b6f5ea39f96e7d5",
+            "hash": "27714bad54f2c81180392bbcfa56e39c1ad1b991",
             "disabled": false
         },
         "https://github.com/evanspearman/ComfyMath": {
@@ -218,11 +186,10 @@
             "disabled": false
         },
         "https://github.com/Kosinkadink/ComfyUI-Advanced-ControlNet": {
-            "hash": "b66cd70c9845a109a85b4a0ef13cefda41ca6039",
+            "hash": "172543b7252db3f15d9bebfa763abb59769624e5",
             "disabled": false
         }
     },
-    "cnr_custom_nodes": {},
     "file_custom_nodes": [
         {
             "filename": "websocket_image_save.py",
@@ -283,7 +250,7 @@
         "ddt==1.7.2": "",
         "defusedxml==0.7.1": "",
         "Deprecated==1.2.15": "",
-        "diffusers==0.32.1": "",
+        "diffusers==0.31.0": "",
         "dill==0.3.8": "",
         "distro==1.9.0": "",
         "dnspython==2.7.0": "",
@@ -301,7 +268,6 @@
         "fairscale==0.4.13": "",
         "fal_client==0.5.6": "",
         "fastapi==0.110.3": "",
-        "ffmpeg-python==0.2.0": "",
         "ffmpy": "git+https://github.com/WASasquatch/ffmpy.git@f000737698b387ffaeab7cd871b0e9185811230d",
         "filelock==3.15.4": "",
         "filterpy==1.4.5": "",
@@ -311,13 +277,11 @@
         "frozenlist==1.4.1": "",
         "fsspec==2024.6.1": "",
         "ftfy==6.3.1": "",
-        "future==1.0.0": "",
         "fvcore==0.1.5.post20221221": "",
         "gdown==5.2.0": "",
-        "gguf==0.14.0": "",
+        "gguf==0.10.0": "",
         "gitdb==4.0.11": "",
         "GitPython==3.1.43": "",
-        "glcontext==3.0.0": "",
         "google-ai-generativelanguage==0.6.10": "",
         "google-api-core==2.23.0": "",
         "google-api-python-client==2.154.0": "",
@@ -359,19 +323,15 @@
         "kiwisolver==1.4.7": "",
         "kornia==0.7.3": "",
         "kornia_rs==0.1.5": "",
-        "lark==1.2.2": "",
         "lark-parser==0.12.0": "",
         "lazy_loader==0.4": "",
         "llvmlite==0.43.0": "",
         "lmdb==1.5.1": "",
         "loguru==0.7.2": "",
-        "lpips==0.1.4": "",
         "lxml==5.3.0": "",
         "manifold3d==3.0.0": "",
         "mapbox_earcut==1.0.2": "",
-        "Markdown==3.7": "",
         "markdown-it-py==3.0.0": "",
-        "markdownify==0.14.1": "",
         "MarkupSafe==2.1.5": "",
         "marshmallow==3.23.1": "",
         "matplotlib==3.9.2": "",
@@ -379,7 +339,6 @@
         "mdurl==0.1.2": "",
         "mediapipe==0.10.18": "",
         "ml_dtypes==0.5.0": "",
-        "moderngl==5.12.0": "",
         "mpmath==1.3.0": "",
         "mss==10.0.0": "",
         "multidict==6.0.5": "",
@@ -410,7 +369,6 @@
         "opencv-contrib-python==4.10.0.84": "",
         "opencv-python==4.10.0.84": "",
         "opencv-python-headless==4.10.0.84": "",
-        "opensimplex==0.4.5.1": "",
         "opt_einsum==3.4.0": "",
         "packaging==24.1": "",
         "pandas==2.2.3": "",
@@ -441,7 +399,6 @@
         "pydantic-settings==2.6.1": "",
         "pydantic_core==2.27.1": "",
         "pydot==2.0.0": "",
-        "pydub==0.25.1": "",
         "pyee==12.1.1": "",
         "PyGithub==2.5.0": "",
         "Pygments==2.18.0": "",
@@ -506,8 +463,6 @@
         "svglib==1.5.1": "",
         "sympy==1.13.2": "",
         "tabulate==0.9.0": "",
-        "tb-nightly==2.19.0a20250112": "",
-        "tensorboard-data-server==0.7.2": "",
         "tensorrt==10.7.0": "",
         "tensorrt-cu12-bindings==10.7.0": "",
         "tensorrt-cu12-libs==10.7.0": "",
@@ -519,7 +474,6 @@
         "tinycss2==1.4.0": "",
         "tldextract==5.1.3": "",
         "tokenizers==0.19.1": "",
-        "toml==0.10.2": "",
         "tomli==2.2.1": "",
         "torch==2.4.0": "",
         "torchaudio==2.4.0": "",
@@ -548,9 +502,7 @@
         "wcwidth==0.2.13": "",
         "webencodings==0.5.1": "",
         "websocket-client==1.8.0": "",
-        "Werkzeug==3.1.3": "",
         "wget==3.2": "",
-        "wordcloud==1.9.4": "",
         "wrapt==1.17.0": "",
         "xatlas==0.0.9": "",
         "xxhash==3.5.0": "",

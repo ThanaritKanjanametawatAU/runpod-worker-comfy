@@ -1,6 +1,6 @@
 services:
   my-comfyui-worker:
-    image: whitemoney293/comfyui-worker:v1.1.1
+    image: whitemoney293/comfyui-worker:v1.2.3
     deploy:
       resources:
         reservations:

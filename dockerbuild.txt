@@ -43,15 +43,22 @@ sudo docker run --rm --runtime=nvidia --gpus all nvidia/cuda:12.1.0-cudnn8-devel
 
 
 
-# Note Disable the ComfyUI Login before building the image
+
+**Real Build Commands Here, Read build.log for the latest build**
+
+
+# 0. Remove These custom nodes from a new worker_snapshot.json before building the image
+# - Login
+# - RemBG
+
 
 # 1. Build the docker image without cache
 DOCKER_BUILDKIT=1 docker build --build-arg HUGGINGFACE_ACCESS_TOKEN=$HUGGINGFACE_ACCESS_TOKEN \
 --build-arg GITHUB_TOKEN=$GITHUB_TOKEN \
--t whitemoney293/comfyui-worker:v1.1.1 --platform linux/amd64 --progress=plain . 2>&1 | tee build.log
+-t whitemoney293/comfyui-worker:v1.2.3 --platform linux/amd64 --progress=plain . 2>&1 | tee build.log
 
 
-docker push whitemoney293/comfyui-worker:v1.1.1
+docker push whitemoney293/comfyui-worker:v1.2.3
 
 # 2. Test with Docker Compose
 docker compose up

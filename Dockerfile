@@ -39,7 +39,7 @@ RUN . venv/bin/activate && pip install comfy-cli
 
 # Install ComfyUI
 # RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.1 --nvidia --version 0.3.4
-RUN . venv/bin/activate && /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.1 --nvidia --version 0.3.6
+RUN . venv/bin/activate && /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.1 --nvidia --version 0.3.13
 
 
 # Change working directory to ComfyUI
@@ -56,22 +56,25 @@ WORKDIR /
 # Optionally copy the snapshot file
 ADD worker_snapshot.json /
 
-# Add scripts
+# Add scripts and Restore snapshot
 ADD src/start.sh src/restore_snapshot.sh src/rp_handler.py test_input.json ./
 RUN chmod +x /start.sh /restore_snapshot.sh && . venv/bin/activate && /restore_snapshot.sh
 
 
 RUN . venv/bin/activate && pip install --upgrade typing_extensions
 
-RUN . venv/bin/activate && pip install torchvision
+RUN . venv/bin/activate && pip install --upgrade torchvision
 
-RUN . venv/bin/activate && comfy update all && comfy update comfy
+RUN . venv/bin/activate && comfy update all
 
-RUN . venv/bin/activate && pip install xformers
+# Solve issues with Stable Hair II Dependencies
+RUN . venv/bin/activate && pip install --upgrade xformers && pip install --upgrade huggingface_hub==0.25.2 && pip install --upgrade diffusers==0.32.1
+
 
 
 # Start container
-CMD ["/start.sh"]
+# CMD ["/start.sh"]
+
 
 # Stage 2: Download models
 FROM base AS downloader
@@ -103,37 +106,51 @@ RUN mkdir -p models/checkpoints models/vae models/loras models/style_models mode
 FROM base AS final
 
 # Add Your Own Models and Files
-COPY models/ChrismasSuit.png /comfyui/input/
-COPY models/elf.png /comfyui/input/
-COPY models/padoru.png /comfyui/input/
-COPY models/reindeer.png /comfyui/input/
-COPY models/santa.png /comfyui/input/
+# COPY models/ChrismasSuit.png /comfyui/input/
+# COPY models/elf.png /comfyui/input/
+# COPY models/padoru.png /comfyui/input/
+# COPY models/reindeer.png /comfyui/input/
+# COPY models/santa.png /comfyui/input/
 
-
+COPY models/*.png /comfyui/input/
 COPY models/MooDeng.safetensors /comfyui/models/loras/
+
+
 RUN ls /comfyui/models/loras/
 RUN mkdir -p /comfyui/models/LLM /comfyui/models/sams /comfyui/models/grounding-dino
 
 # Copy models from the docker image
-COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/unet/flux1-dev.safetensors /comfyui/models/unet/
-COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/vae/ae.safetensors /comfyui/models/vae/
-COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/clip_vision/sigclip_vision_patch14_384.safetensors /comfyui/models/clip_vision/
-COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/style_models/flux1-redux-dev.safetensors /comfyui/models/style_models/
-COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/clip/clip_l.safetensors /comfyui/models/clip/
-COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/clip/t5xxl_fp8_e4m3fn.safetensors /comfyui/models/clip/
-COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/unet/flux1-fill-dev.safetensors /comfyui/models/unet/
-COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/clip_vision/siglip-so400m-patch14-384.safetensors /comfyui/models/clip_vision/
-COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/clip/ViT-L-14-BEST-smooth-GmP-ft.safetensors /comfyui/models/clip/
-COPY --from=whitemoney293/comfyui-flux-models:v1.1.0 /models/unet/flux1-canny-dev.safetensors /comfyui/models/unet/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/unet/flux1-dev.safetensors /comfyui/models/unet/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/checkpoints/juggernaut_reborn.safetensors /comfyui/models/checkpoints/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/vae/ae.safetensors /comfyui/models/vae/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/clip_vision/sigclip_vision_patch14_384.safetensors /comfyui/models/clip_vision/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/style_models/flux1-redux-dev.safetensors /comfyui/models/style_models/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/clip/clip_l.safetensors /comfyui/models/clip/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/clip/t5xxl_fp8_e4m3fn.safetensors /comfyui/models/clip/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/unet/flux1-fill-dev.safetensors /comfyui/models/unet/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/clip_vision/siglip-so400m-patch14-384.safetensors /comfyui/models/clip_vision/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/clip/ViT-L-14-BEST-smooth-GmP-ft.safetensors /comfyui/models/clip/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/unet/flux1-canny-dev.safetensors /comfyui/models/unet/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/sams/sam_vit_h_4b8939.pth /comfyui/models/sams/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/grounding-dino/GroundingDINO_SwinT_OGC.cfg.py /comfyui/models/grounding-dino/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/grounding-dino/groundingdino_swint_ogc.pth /comfyui/models/grounding-dino/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/diffusers/StableHair/hair_adapter_model.bin /comfyui/models/diffusers/StableHair/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/diffusers/StableHair/hair_bald_model.bin /comfyui/models/diffusers/StableHair/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/diffusers/StableHair/hair_controlnet_model.bin /comfyui/models/diffusers/StableHair/
+# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/diffusers/StableHair/hair_encoder_model.bin /comfyui/models/diffusers/StableHair/
 
-# downloading https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth to /comfyui/models/sams/sam_vit_h_4b8939.pth
-RUN wget -O /comfyui/models/sams/sam_vit_h_4b8939.pth https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
+RUN --mount=type=bind,from=whitemoney293/comfyui-flux-models:v1.2.0,source=/models,target=/tmp/new_models \
+    cp -rn /tmp/new_models/* /comfyui/models/
 
-# downloading https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py to /comfyui/models/grounding-dino/GroundingDINO_SwinT_OGC.cfg.py
-RUN wget -O /comfyui/models/grounding-dino/GroundingDINO_SwinT_OGC.cfg.py https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py
+    
+# # downloading https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth to /comfyui/models/sams/sam_vit_h_4b8939.pth
+# RUN wget -O /comfyui/models/sams/sam_vit_h_4b8939.pth https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
 
-# downloading https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/groundingdino_swint_ogc.pth to /comfyui/models/grounding-dino/groundingdino_swint_ogc.pth
-RUN wget -O /comfyui/models/grounding-dino/groundingdino_swint_ogc.pth https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/groundingdino_swint_ogc.pth
+# # downloading https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py to /comfyui/models/grounding-dino/GroundingDINO_SwinT_OGC.cfg.py
+# RUN wget -O /comfyui/models/grounding-dino/GroundingDINO_SwinT_OGC.cfg.py https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py
+
+# # downloading https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/groundingdino_swint_ogc.pth to /comfyui/models/grounding-dino/groundingdino_swint_ogc.pth
+# RUN wget -O /comfyui/models/grounding-dino/groundingdino_swint_ogc.pth https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/groundingdino_swint_ogc.pth
 
 # Copy models from stage 2 to the final image
 
@@ -150,13 +167,11 @@ RUN wget -O /comfyui/models/grounding-dino/groundingdino_swint_ogc.pth https://h
 
 
 # Check if models are downloaded
-RUN echo "Input files:" && ls /comfyui/input/ && \
-    echo "Lora files:" && ls /comfyui/models/loras/ && \
-    echo "Unet files:" && ls /comfyui/models/unet/ && \
-    echo "VAE files:" && ls /comfyui/models/vae/ && \
-    echo "Clip files:" && ls /comfyui/models/clip/ && \
-    echo "Clip vision files:" && ls /comfyui/models/clip_vision/ && \
-    echo "Style models files:" && ls /comfyui/models/style_models
+RUN apt-get update && apt-get install -y tree && \
+    echo "Verifying models directory structure:" && \
+    tree /comfyui/models && \
+    # Cleanup apt cache to reduce image size
+    rm -rf /var/lib/apt/lists/*
 
 RUN . /venv/bin/activate && comfy env
 
