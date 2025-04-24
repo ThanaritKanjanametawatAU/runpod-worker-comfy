@@ -8,6 +8,9 @@ import os
 import requests
 import base64
 from io import BytesIO
+import cloudinary
+import cloudinary.uploader
+from cloudinary.utils import cloudinary_url
 
 # Time to wait between API check attempts in milliseconds
 COMFY_API_AVAILABLE_INTERVAL_MS = 50
@@ -224,7 +227,9 @@ def process_output_images(outputs, job_id):
     - After confirming the existence of the image in the output folder, it checks if the
       AWS S3 bucket is configured via the BUCKET_ENDPOINT_URL environment variable.
     - If AWS S3 is configured, it uploads the image to the bucket and returns the URL.
-    - If AWS S3 is not configured, it encodes the image in base64 and returns the string.
+    - If AWS S3 is not configured, it checks if Cloudinary configuration is available.
+    - If Cloudinary is configured, it uploads the image to Cloudinary and returns the URL.
+    - If neither AWS S3 nor Cloudinary is configured, it encodes the image in base64 and returns the string.
     - If the image file does not exist in the output folder, it returns an error status
       with a message indicating the missing image file.
     """
@@ -253,6 +258,29 @@ def process_output_images(outputs, job_id):
             image = rp_upload.upload_image(job_id, local_image_path)
             print(
                 "runpod-worker-comfy - the image was generated and uploaded to AWS S3"
+            )
+        elif (os.environ.get("CLOUDINARY_CLOUD_NAME") and 
+              os.environ.get("CLOUDINARY_API_KEY") and 
+              os.environ.get("CLOUDINARY_API_SECRET")):
+            # Configure Cloudinary
+            cloudinary.config(
+                cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+                api_key=os.environ.get("CLOUDINARY_API_KEY"),
+                api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+                secure=True
+            )
+            
+            # Upload to Cloudinary with a unique public_id based on job_id
+            upload_result = cloudinary.uploader.upload(
+                local_image_path,
+                public_id=f"comfyui-{job_id}"
+            )
+            
+            # Get the secure URL from the upload result
+            image = upload_result["secure_url"]
+            
+            print(
+                "runpod-worker-comfy - the image was generated and uploaded to Cloudinary"
             )
         else:
             # base64 image
