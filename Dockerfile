@@ -1,5 +1,5 @@
 # Stage 1: Base image with common dependencies
-FROM nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04 AS base
+FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04 AS base
 
 # Prevents prompts from packages asking for user input during installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -10,7 +10,6 @@ ENV PYTHONUNBUFFERED=1
 # Speed up some cmake builds
 ENV CMAKE_BUILD_PARALLEL_LEVEL=8
 
-ARG GITHUB_TOKEN
 
 # Install Python, git and other necessary tools
 RUN apt-get update && apt-get install -y \
@@ -39,14 +38,14 @@ RUN . venv/bin/activate && pip install comfy-cli
 
 # Install ComfyUI
 # RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.1 --nvidia --version 0.3.4
-RUN . venv/bin/activate && /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.1 --nvidia --version 0.3.13
+RUN . venv/bin/activate && /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.4 --nvidia
 
 
 # Change working directory to ComfyUI
 WORKDIR /comfyui
 
 # Install runpod
-RUN . ../venv/bin/activate && pip install runpod requests
+RUN . ../venv/bin/activate && pip install runpod requests cloudinary
 
 # Support for the network volume
 ADD src/extra_model_paths.yaml ./
@@ -63,12 +62,14 @@ RUN chmod +x /start.sh /restore_snapshot.sh && . venv/bin/activate && /restore_s
 
 RUN . venv/bin/activate && pip install --upgrade typing_extensions
 
-RUN . venv/bin/activate && pip install --upgrade torchvision
+# Replace the torchvision upgrade line with specific version compatible with CUDA 12.4
+RUN . venv/bin/activate && pip install torchaudio==2.6.0 torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124
 
 RUN . venv/bin/activate && comfy update all
 
 # Solve issues with Stable Hair II Dependencies
-RUN . venv/bin/activate && pip install --upgrade xformers && pip install --upgrade huggingface_hub==0.25.2 && pip install --upgrade diffusers==0.32.1
+RUN . venv/bin/activate && pip install --upgrade xformers && pip install --upgrade huggingface_hub==0.30.2 \
+&& pip install --upgrade diffusers==0.32.1 && pip install --upgrade -U transformers && pip install xformers
 
 
 
@@ -81,8 +82,6 @@ FROM base AS downloader
 
 SHELL ["/bin/bash", "-c"]
 
-ARG HUGGINGFACE_ACCESS_TOKEN
-RUN echo "Token prefix: ${HUGGINGFACE_ACCESS_TOKEN:0:8}..."
 
 # Change working directory to ComfyUI
 WORKDIR /comfyui

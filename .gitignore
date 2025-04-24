@@ -9,3 +9,5 @@ __pycache__
 dockerbuildcmd.txt
 models/*.png
 models/*.jpg
+.cursor
+.idea

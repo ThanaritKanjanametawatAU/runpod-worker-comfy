@@ -55,10 +55,14 @@ sudo docker run --rm --runtime=nvidia --gpus all nvidia/cuda:12.1.0-cudnn8-devel
 # 1. Build the docker image without cache
 DOCKER_BUILDKIT=1 docker build --build-arg HUGGINGFACE_ACCESS_TOKEN=$HUGGINGFACE_ACCESS_TOKEN \
 --build-arg GITHUB_TOKEN=$GITHUB_TOKEN \
--t whitemoney293/comfyui-worker:v1.2.3 --platform linux/amd64 --progress=plain . 2>&1 | tee build.log
+-t whitemoney293/comfyui-worker:v1.3.0 --platform linux/amd64 --progress=plain . 2>&1 | tee build.log
 
 
-docker push whitemoney293/comfyui-worker:v1.2.3
+
+DOCKER_BUILDKIT=1 docker build -t whitemoney293/comfyui-worker:v1.3.3 --platform linux/amd64 --progress=plain . 2>&1 | tee build.log
+
+
+docker push whitemoney293/comfyui-worker:v1.3.3
 
 # 2. Test with Docker Compose
 docker compose up

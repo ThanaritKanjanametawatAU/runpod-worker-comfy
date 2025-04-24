@@ -18,6 +18,7 @@ Read our article here: https://blib.la/blog/comfyui-on-runpod
 - [Features](#features)
 - [Config](#config)
   * [Upload image to AWS S3](#upload-image-to-aws-s3)
+  * [Upload image to Cloudinary](#upload-image-to-cloudinary)
 - [Use the Docker image on RunPod](#use-the-docker-image-on-runpod)
   * [Create your template (optional)](#create-your-template-optional)
   * [Create your endpoint](#create-your-endpoint)
@@ -104,6 +105,16 @@ This is only needed if you want to upload the generated picture to AWS S3. If yo
 | `BUCKET_ENDPOINT_URL`      | The endpoint URL of your S3 bucket.                     | `https://<bucket>.s3.<region>.amazonaws.com` |
 | `BUCKET_ACCESS_KEY_ID`     | Your AWS access key ID for accessing the S3 bucket.     | `AKIAIOSFODNN7EXAMPLE`                       |
 | `BUCKET_SECRET_ACCESS_KEY` | Your AWS secret access key for accessing the S3 bucket. | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`   |
+
+### Upload image to Cloudinary
+
+This is needed if you want to upload the generated image to Cloudinary instead of AWS S3 or base64. 
+
+| Environment Variable      | Description                               | Example               |
+| ------------------------- | ----------------------------------------- | --------------------- |
+| `CLOUDINARY_CLOUD_NAME`   | Your Cloudinary cloud name                | `prisma-forge`        |
+| `CLOUDINARY_API_KEY`      | Your Cloudinary API key                   | `395155591812271`     |
+| `CLOUDINARY_API_SECRET`   | Your Cloudinary API secret                | `your-api-secret`     |
 
 ## Use the Docker image on RunPod
 

@@ -1,6 +1,6 @@
 services:
   my-comfyui-worker:
-    image: whitemoney293/comfyui-worker:v1.2.3
+    image: whitemoney293/comfyui-worker:v1.3.3
     deploy:
       resources:
         reservations:
@@ -10,6 +10,9 @@ services:
               capabilities: [gpu]
     environment:
       - SERVE_API_LOCALLY=true
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     ports:
       - "8000:8000"
       - "8188:8188"
