@@ -15,7 +15,7 @@ from cloudinary.utils import cloudinary_url
 # Time to wait between API check attempts in milliseconds
 COMFY_API_AVAILABLE_INTERVAL_MS = 50
 # Maximum number of API check attempts
-COMFY_API_AVAILABLE_MAX_RETRIES = 500
+COMFY_API_AVAILABLE_MAX_RETRIES = 750
 # Time to wait between poll attempts in milliseconds
 COMFY_POLLING_INTERVAL_MS = int(os.environ.get("COMFY_POLLING_INTERVAL_MS", 250))
 # Maximum number of poll attempts
@@ -64,9 +64,14 @@ def validate_input(job_input):
                 None,
                 "'images' must be a list of objects with 'name' and 'image' keys",
             )
+        
+    # Validate the return type
+    return_type = job_input.get("return_type")
+    if return_type is None or return_type not in ["AWS_S3_URL", "Cloudinary_URL", "base64"]:
+        return_type = "Cloudinary_URL"
 
     # Return validated data and no error
-    return {"workflow": workflow, "images": images}, None
+    return {"workflow": workflow, "images": images, "return_type": return_type}, None
 
 
 def check_server(url, retries=500, delay=50):
@@ -203,7 +208,7 @@ def base64_encode(img_path):
         return f"{encoded_string}"
 
 
-def process_output_images(outputs, job_id):
+def process_output_images(outputs, job_id, return_type):
     """
     This function takes the "outputs" from image generation and the job ID,
     then determines the correct way to return the image, either as a direct URL
@@ -243,6 +248,12 @@ def process_output_images(outputs, job_id):
         if "images" in node_output:
             for image in node_output["images"]:
                 output_images = os.path.join(image["subfolder"], image["filename"])
+        elif "video" in node_output:
+            for video in node_output["video"]:
+                output_images = os.path.join(video["subfolder"], video["filename"])
+        elif "audio" in node_output:
+            for audio in node_output["audio"]:
+                output_images = os.path.join(audio["subfolder"], audio["filename"])
 
     print(f"runpod-worker-comfy - image generation is done")
 
@@ -253,7 +264,7 @@ def process_output_images(outputs, job_id):
 
     # The image is in the output folder
     if os.path.exists(local_image_path):
-        if os.environ.get("BUCKET_ENDPOINT_URL", False):
+        if os.environ.get("BUCKET_ENDPOINT_URL", False) and return_type == "AWS_S3_URL":
             # URL to image in AWS S3
             image = rp_upload.upload_image(job_id, local_image_path)
             print(
@@ -261,7 +272,7 @@ def process_output_images(outputs, job_id):
             )
         elif (os.environ.get("CLOUDINARY_CLOUD_NAME") and 
               os.environ.get("CLOUDINARY_API_KEY") and 
-              os.environ.get("CLOUDINARY_API_SECRET")):
+              os.environ.get("CLOUDINARY_API_SECRET")) and return_type == "Cloudinary_URL":
             # Configure Cloudinary
             cloudinary.config(
                 cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
@@ -273,11 +284,15 @@ def process_output_images(outputs, job_id):
             # Upload to Cloudinary with a unique public_id based on job_id
             upload_result = cloudinary.uploader.upload(
                 local_image_path,
+                resource_type="auto",
                 public_id=f"comfyui-{job_id}"
             )
             
             # Get the secure URL from the upload result
-            image = upload_result["secure_url"]
+            image = {
+                "public_id": f"comfyui-{job_id}",
+                "secure_url": upload_result["secure_url"]
+            }
             
             print(
                 "runpod-worker-comfy - the image was generated and uploaded to Cloudinary"
@@ -324,6 +339,7 @@ def handler(job):
     # Extract validated data
     workflow = validated_data["workflow"]
     images = validated_data.get("images")
+    return_type = validated_data.get("return_type")
 
     # Make sure that the ComfyUI API is available
     check_server(
@@ -356,6 +372,22 @@ def handler(job):
             # Exit the loop if we have found the history
             if prompt_id in history and history[prompt_id].get("outputs"):
                 break
+            elif prompt_id in history and history[prompt_id].get("status", {}).get("status_str", "") == "error":
+                # Get the status object
+                status = history[prompt_id].get("status", {})
+                # Find the execution error message
+                error_message = ""
+                
+                for message in status.get("messages", []):
+                    if message[0] == "execution_error":
+                        error_data = message[1]
+                        error_message = f"Error in node {error_data.get('node_id')} ({error_data.get('node_type')}): {error_data.get('error', 'Unknown error')}"
+                        break
+
+                
+                return {
+                    "error": "The workflow failed to run. There is something wrong with the workflow.\n" + error_message
+                }
             else:
                 # Wait before trying again
                 time.sleep(COMFY_POLLING_INTERVAL_MS / 1000)
@@ -366,7 +398,7 @@ def handler(job):
         return {"error": f"Error waiting for image generation: {str(e)}"}
 
     # Get the generated image and return it as URL in an AWS bucket or as base64
-    images_result = process_output_images(history[prompt_id].get("outputs"), job["id"])
+    images_result = process_output_images(history[prompt_id].get("outputs"), job["id"], return_type)
 
     result = {**images_result, "refresh_worker": REFRESH_WORKER}
 

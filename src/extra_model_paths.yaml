@@ -10,3 +10,29 @@ runpod_worker_comfy:
   upscale_models: models/upscale_models/
   vae: models/vae/
   unet: models/unet/
+  LLM: models/LLM/
+  animatediff_models: models/animatediff_models/
+  animatediff_motion_lora: models/animatediff_motion_lora/
+  diffusers: models/diffusers/
+  diffusion_models: models/diffusion_models/
+  facedetection: models/facedetection/
+  facerestore_models: models/facerestore_models/
+  gligen: models/gligen/
+  grounding-dino: models/grounding-dino/
+  hypernetworks: models/hypernetworks/
+  insightface: models/insightface/
+  ipadapter: models/ipadapter/
+  liveportrait: models/liveportrait/
+  onnx: models/onnx/
+  photomaker: models/photomaker/
+  pulid: models/pulid/
+  sam2: models/sam2/
+  sams: models/sams/
+  sonic: models/sonic/
+  style_models: models/style_models/
+  t5: models/t5/
+  text_encoders: models/text_encoders/
+  ultralytics: models/ultralytics/
+  vae_approx: models/vae_approx/
+  xlabs: models/xlabs/
+

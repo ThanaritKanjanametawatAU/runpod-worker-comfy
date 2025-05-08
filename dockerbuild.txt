@@ -52,18 +52,71 @@ sudo docker run --rm --runtime=nvidia --gpus all nvidia/cuda:12.1.0-cudnn8-devel
 # - RemBG
 
 
-# 1. Build the docker image without cache
-DOCKER_BUILDKIT=1 docker build --build-arg HUGGINGFACE_ACCESS_TOKEN=$HUGGINGFACE_ACCESS_TOKEN \
---build-arg GITHUB_TOKEN=$GITHUB_TOKEN \
--t whitemoney293/comfyui-worker:v1.3.0 --platform linux/amd64 --progress=plain . 2>&1 | tee build.log
+When pip 25.3, for flash attention
+  RUN . venv/bin/activate && MAX_JOBS=4 pip install flash-attn --use-pep517 --no-build-isolation
 
 
+# 0. Add custom no0de WanVideoWrapper to the Snapshot
 
-DOCKER_BUILDKIT=1 docker build -t whitemoney293/comfyui-worker:v1.3.3 --platform linux/amd64 --progress=plain . 2>&1 | tee build.log
+# 1. Create temporary secret files
+set -a; source .env; set +a;
 
 
-docker push whitemoney293/comfyui-worker:v1.3.3
+# 2. Create temporary files with secrets
+echo "$HUGGINGFACE_ACCESS_TOKEN" > huggingface_token.txt
 
-# 2. Test with Docker Compose
+
+# 3. Build the docker image
+DOCKER_BUILDKIT=1 docker build --secret id=huggingface,src=huggingface_token.txt \
+-t whitemoney293/comfyui-worker:v2.0.9 --platform linux/amd64 --progress=plain . 2>&1 | tee build.log
+
+
+# 4. Push the docker image to Docker Hub
+docker push whitemoney293/comfyui-worker:v2.0.9
+
+
+# 5. Test with Docker Compose
 docker compose up
 docker compose exec my-comfyui-worker bash
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Local Mirroring
+docker compose up to use override file
+
+
+# Run container without the override file
+docker compose -f docker-compose.yml up -d
+
+# Make your changes and test
+# ...
+
+# Commit the container without the dev environment variables
+   docker commit \
+  --change='CMD ["/start.sh"]' \
+  --change='ENV SERVE_API_LOCALLY=false' \
+  --author="Thanarit Kanjanametawat" \
+  --message="Added custom workflows and models for Lipsync" \
+  aed2c96bbb72 whitemoney293/comfyui-worker:v1.5.0
+
+# Stop the container
+docker compose -f docker-compose.yml down
+
+# Push to your registry
+docker push whitemoney293/comfyui-worker:v1.4.3-prod

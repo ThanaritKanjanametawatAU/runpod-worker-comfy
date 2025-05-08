@@ -11,6 +11,8 @@ ENV PYTHONUNBUFFERED=1
 ENV CMAKE_BUILD_PARALLEL_LEVEL=8
 
 
+
+
 # Install Python, git and other necessary tools
 RUN apt-get update && apt-get install -y \
     python3.10 \
@@ -18,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     git \
     wget \
     libgl1 \
+    ffmpeg \
     && ln -sf /usr/bin/python3.10 /usr/bin/python \
     && ln -sf /usr/bin/pip3 /usr/bin/pip
 
@@ -59,47 +62,34 @@ ADD worker_snapshot.json /
 ADD src/start.sh src/restore_snapshot.sh src/rp_handler.py test_input.json ./
 RUN chmod +x /start.sh /restore_snapshot.sh && . venv/bin/activate && /restore_snapshot.sh
 
+# Clone ComfyUI-WanVideoWrapper custom node
+RUN mkdir -p /comfyui/custom_nodes && \
+    git clone https://github.com/kijai/ComfyUI-WanVideoWrapper /comfyui/custom_nodes/ComfyUI-WanVideoWrapper
+
 
 RUN . venv/bin/activate && pip install --upgrade typing_extensions
 
-# Replace the torchvision upgrade line with specific version compatible with CUDA 12.4
-RUN . venv/bin/activate && pip install torchaudio==2.6.0 torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124
 
 RUN . venv/bin/activate && comfy update all
 
-# Solve issues with Stable Hair II Dependencies
-RUN . venv/bin/activate && pip install --upgrade xformers && pip install --upgrade huggingface_hub==0.30.2 \
-&& pip install --upgrade diffusers==0.32.1 && pip install --upgrade -U transformers && pip install xformers
+# Install torch, torchvision, torchaudio, and xformers first (all pinned, using the correct index URL)
+RUN . venv/bin/activate && pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124
 
+# Install the compatible xformers version for torch 2.6.0 and CUDA 12.4
+RUN . venv/bin/activate && pip install xformers==0.0.29.post2 --index-url https://download.pytorch.org/whl/cu124
 
+# Install build tools and ninja before Python dependencies
+RUN apt-get update && apt-get install -y build-essential python3-dev && \
+    . venv/bin/activate && pip install --upgrade pip && pip install ninja packaging
 
-# Start container
-# CMD ["/start.sh"]
+# Install the rest of your dependencies (without flash-attn)
+RUN . venv/bin/activate && pip install --upgrade huggingface_hub==0.30.2 diffusers transformers transparent_background tiktoken moviepy triton setuptools wheel psutil --no-build-isolation
 
+# Install flash-attn separately with no build isolation and limited jobs
+RUN . venv/bin/activate && MAX_JOBS=4 pip install flash-attn --no-build-isolation
 
-# Stage 2: Download models
-FROM base AS downloader
-
-SHELL ["/bin/bash", "-c"]
-
-
-# Change working directory to ComfyUI
-WORKDIR /comfyui
-
-# Create necessary directories
-RUN mkdir -p models/checkpoints models/vae models/loras models/style_models models/clip_vision models/unet models/clip input
-
-
-# Download checkpoints/vae/LoRA to include in image based on model type
-# RUN wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O /comfyui/models/unet/flux1-dev.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors && \
-#       wget -O /comfyui/models/clip/clip_l.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors && \
-#       wget -O /comfyui/models/clip/t5xxl_fp16.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors && \
-#       wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O /comfyui/models/vae/ae.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors && \
-#       wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O /comfyui/models/clip_vision/sigclip_vision_patch14_384.safetensors https://huggingface.co/Comfy-Org/sigclip_vision_384/resolve/main/sigclip_vision_patch14_384.safetensors && \
-#       wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O /comfyui/models/style_models/flux1-redux-dev.safetensors https://huggingface.co/black-forest-labs/FLUX.1-Redux-dev/resolve/main/flux1-redux-dev.safetensors
-
-
-
+# Install custom node requirements without allowing torch upgrades
+RUN . venv/bin/activate && pip install --no-deps -r /comfyui/custom_nodes/ComfyUI-SkyReels-A2/requirements.txt
 
 # Stage 3: Final image
 FROM base AS final
@@ -111,58 +101,49 @@ FROM base AS final
 # COPY models/reindeer.png /comfyui/input/
 # COPY models/santa.png /comfyui/input/
 
+# Download Fish Speech models
+# RUN mkdir -p /comfyui/models/checkpoints /comfyui/models/vae /comfyui/models/loras /comfyui/models/style_models \
+# /comfyui/models/clip_vision /comfyui/models/unet /comfyui/models/clip /comfyui/input \
+# /comfyui/models/sonic /comfyui/custom_nodes/ComfyUI_FishSpeech_EX_PP/checkpoints/fish-speech-1.5/ \
+# /comfyui/custom_nodes/comfyui_layerstyle/RMBG-1.4
+
+# Use BuildKit secret mount to securely access the token during build
+# RUN --mount=type=secret,id=huggingface,target=/run/secrets/huggingface \
+#     HUGGINGFACE_TOKEN=$(cat /run/secrets/huggingface) \
+#     wget --header="Authorization: Bearer $HUGGINGFACE_TOKEN" -O/comfyui/custom_nodes/ComfyUI_FishSpeech_EX_PP/checkpoints/fish-speech-1.5/model.pth \
+#     https://huggingface.co/fishaudio/fish-speech-1.5/resolve/main/model.pth
+
+# RUN --mount=type=secret,id=huggingface,target=/run/secrets/huggingface \
+#     HUGGINGFACE_TOKEN=$(cat /run/secrets/huggingface) \
+#     wget --header="Authorization: Bearer $HUGGINGFACE_TOKEN" -O /comfyui/custom_nodes/ComfyUI_FishSpeech_EX_PP/checkpoints/fish-speech-1.5/firefly-gan-vq-fsq-8x1024-21hz-generator.pth \
+#     https://huggingface.co/fishaudio/fish-speech-1.5/resolve/main/firefly-gan-vq-fsq-8x1024-21hz-generator.pth
+
+
+RUN --mount=type=secret,id=huggingface,target=/run/secrets/huggingface \
+    HUGGINGFACE_TOKEN=$(cat /run/secrets/huggingface) && \
+    . venv/bin/activate && \
+    HUGGINGFACE_TOKEN=$HUGGINGFACE_TOKEN huggingface-cli download fishaudio/fish-speech-1.5 \
+    --include model.pth \
+    --local-dir /comfyui/custom_nodes/ComfyUI_FishSpeech_EX_PP/checkpoints/fish-speech-1.5/
+
+RUN --mount=type=secret,id=huggingface,target=/run/secrets/huggingface \
+    HUGGINGFACE_TOKEN=$(cat /run/secrets/huggingface) && \
+    . venv/bin/activate && \
+    HUGGINGFACE_TOKEN=$HUGGINGFACE_TOKEN huggingface-cli download fishaudio/fish-speech-1.5 \
+    --include firefly-gan-vq-fsq-8x1024-21hz-generator.pth \
+    --local-dir /comfyui/custom_nodes/ComfyUI_FishSpeech_EX_PP/checkpoints/fish-speech-1.5/
+
+RUN --mount=type=secret,id=huggingface,target=/run/secrets/huggingface \
+    HUGGINGFACE_TOKEN=$(cat /run/secrets/huggingface) && \
+    . venv/bin/activate && \
+    HUGGINGFACE_TOKEN=$HUGGINGFACE_TOKEN huggingface-cli download briaai/RMBG-1.4 \
+    --include model.pth \
+    --local-dir /comfyui/custom_nodes/comfyui_layerstyle/RMBG-1.4/
+
+
 COPY models/*.png /comfyui/input/
-COPY models/MooDeng.safetensors /comfyui/models/loras/
-
-
-RUN ls /comfyui/models/loras/
-RUN mkdir -p /comfyui/models/LLM /comfyui/models/sams /comfyui/models/grounding-dino
-
-# Copy models from the docker image
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/unet/flux1-dev.safetensors /comfyui/models/unet/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/checkpoints/juggernaut_reborn.safetensors /comfyui/models/checkpoints/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/vae/ae.safetensors /comfyui/models/vae/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/clip_vision/sigclip_vision_patch14_384.safetensors /comfyui/models/clip_vision/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/style_models/flux1-redux-dev.safetensors /comfyui/models/style_models/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/clip/clip_l.safetensors /comfyui/models/clip/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/clip/t5xxl_fp8_e4m3fn.safetensors /comfyui/models/clip/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/unet/flux1-fill-dev.safetensors /comfyui/models/unet/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/clip_vision/siglip-so400m-patch14-384.safetensors /comfyui/models/clip_vision/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/clip/ViT-L-14-BEST-smooth-GmP-ft.safetensors /comfyui/models/clip/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/unet/flux1-canny-dev.safetensors /comfyui/models/unet/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/sams/sam_vit_h_4b8939.pth /comfyui/models/sams/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/grounding-dino/GroundingDINO_SwinT_OGC.cfg.py /comfyui/models/grounding-dino/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/grounding-dino/groundingdino_swint_ogc.pth /comfyui/models/grounding-dino/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/diffusers/StableHair/hair_adapter_model.bin /comfyui/models/diffusers/StableHair/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/diffusers/StableHair/hair_bald_model.bin /comfyui/models/diffusers/StableHair/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/diffusers/StableHair/hair_controlnet_model.bin /comfyui/models/diffusers/StableHair/
-# COPY --from=whitemoney293/comfyui-flux-models:v1.2.0 /models/diffusers/StableHair/hair_encoder_model.bin /comfyui/models/diffusers/StableHair/
-
-RUN --mount=type=bind,from=whitemoney293/comfyui-flux-models:v1.2.0,source=/models,target=/tmp/new_models \
-    cp -rn /tmp/new_models/* /comfyui/models/
-
-    
-# # downloading https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth to /comfyui/models/sams/sam_vit_h_4b8939.pth
-# RUN wget -O /comfyui/models/sams/sam_vit_h_4b8939.pth https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
-
-# # downloading https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py to /comfyui/models/grounding-dino/GroundingDINO_SwinT_OGC.cfg.py
-# RUN wget -O /comfyui/models/grounding-dino/GroundingDINO_SwinT_OGC.cfg.py https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py
-
-# # downloading https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/groundingdino_swint_ogc.pth to /comfyui/models/grounding-dino/groundingdino_swint_ogc.pth
-# RUN wget -O /comfyui/models/grounding-dino/groundingdino_swint_ogc.pth https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/groundingdino_swint_ogc.pth
-
-# Copy models from stage 2 to the final image
-
-# COPY --from=downloader /comfyui/models /comfyui/models
-# COPY --from=downloader /comfyui/input /comfyui/input
-
-# COPY models/flux1-dev.safetensors models/unet/
-# COPY models/clip_l.safetensors models/clip/
-# COPY models/t5xxl_fp16.safetensors models/clip/
-# COPY models/ae.safetensors models/vae/
-# COPY models/sigclip_vision_patch14_384.safetensors models/clip_vision/
-# COPY models/flux1-redux-dev.safetensors models/style_models/
-
+# COPY models/MooDeng.safetensors /comfyui/models/loras/
+# COPY models/sonic/ /comfyui/models/sonic/
 
 
 # Check if models are downloaded
@@ -172,9 +153,9 @@ RUN apt-get update && apt-get install -y tree && \
     # Cleanup apt cache to reduce image size
     rm -rf /var/lib/apt/lists/*
 
+
 RUN . /venv/bin/activate && comfy env
 
-
-
+RUN rm -rf /comfyui/models && ln -s /runpod-volume/models /comfyui/models
 
 CMD ["/start.sh"]

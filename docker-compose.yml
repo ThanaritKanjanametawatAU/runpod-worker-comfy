@@ -1,6 +1,6 @@
 services:
   my-comfyui-worker:
-    image: whitemoney293/comfyui-worker:v1.3.3
+    image: whitemoney293/comfyui-worker:v2.0.9
     deploy:
       resources:
         reservations:
@@ -18,4 +18,4 @@ services:
       - "8188:8188"
     volumes:
       - ./data/comfyui/output:/comfyui/output
-      - ./data/runpod-volume:/runpod-volume
+      - /home/money/StableDiffusionTools/ComfyUI/models:/runpod-volume/models
